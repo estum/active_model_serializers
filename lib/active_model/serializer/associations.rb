@@ -64,7 +64,7 @@ module ActiveModel
 
         private
 
-        # Add reflection and define {name} accessor.
+        # Add reflection.
         # @param [ActiveModel::Serializer::Reflection] reflection
         # @return [void]
         #
@@ -74,12 +74,22 @@ module ActiveModel
           self._reflections = _reflections.dup
 
           unless method_defined?(reflection.name)
-            define_method reflection.name do
-              object.send reflection.name
-            end
+            define_association_accessor(reflection)
           end
 
           self._reflections << reflection
+        end
+
+        # Define {name} accessor.
+        # @param [ActiveModel::Serializer::Reflection] reflection
+        # @return [void]
+        #
+        # @api private
+        #
+        def define_association_accessor(reflection)
+          define_method reflection.name do
+            object.public_send reflection.name
+          end
         end
       end
 
@@ -89,10 +99,22 @@ module ActiveModel
         return unless object
 
         Enumerator.new do |y|
-          self.class._reflections.each do |reflection|
+          serializer_reflections.each do |reflection|
             y.yield reflection.build_association(self, options)
           end
         end
+      end
+
+      protected
+
+      # Returns defined serializer reflections. Extracted to the instance method
+      # to be able to inherit.
+      # @return [Array<Reflection>]
+      #
+      # @api protected
+      #
+      def serializer_reflections
+        self.class._reflections
       end
     end
   end

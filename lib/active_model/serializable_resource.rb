@@ -1,6 +1,9 @@
 require "set"
 module ActiveModel
   class SerializableResource
+    extend ActiveSupport::Autoload
+
+    autoload :Sideloader
 
     ADAPTER_OPTION_KEYS = Set.new([:include, :fields, :adapter])
 
@@ -8,6 +11,7 @@ module ActiveModel
       @resource = resource
       @adapter_opts, @serializer_opts =
         options.partition { |k, _| ADAPTER_OPTION_KEYS.include? k }.map { |h| Hash[h] }
+      sideload! if Serializer.config.use_sideloading
     end
 
     delegate :serializable_hash, :as_json, :to_json, to: :adapter
@@ -78,5 +82,8 @@ module ActiveModel
 
     attr_reader :resource, :adapter_opts, :serializer_opts
 
+    def sideload!
+      @resource = Sideloader.new.sideload(resource, adapter_opts[:include])
+    end
   end
 end

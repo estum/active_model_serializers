@@ -11,9 +11,9 @@ module ActiveModel
       #   with dots, like "comments.author".
       #   It will be automaticaly converted to use with the +includes+ method.
       def sideload(resource, associations)
-        associations = associations.is_a?(String) ? associations.split(",") : associations.dup
-
         if associations.present?
+          associations = associations.is_a?(String) ? associations.split(",") : associations.dup
+
           associations.map! do |association|
             association.include?('.') ? build_nested_hash(association) : association
           end

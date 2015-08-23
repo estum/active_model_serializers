@@ -176,7 +176,7 @@ module ActiveModel
         def is_paginated?(resource)
           resource.respond_to?(:current_page) &&
             resource.respond_to?(:total_pages) &&
-            resource.respond_to?(:size)
+            resource.respond_to?(:per_page)
         end
       end
     end

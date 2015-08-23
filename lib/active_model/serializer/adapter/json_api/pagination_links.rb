@@ -14,7 +14,7 @@ module ActiveModel
 
           def serializable_hash(options = {})
             pages_from.each_with_object({}) do |(key, value), hash|
-              params = query_parameters.merge(page: { number: value, size: collection.size }).to_query
+              params = query_parameters.merge(page: value, per_page: collection.per_page).to_query
 
               hash[key] = "#{url(options)}?#{params}"
             end
@@ -23,18 +23,18 @@ module ActiveModel
           private
 
           def pages_from
-            return {} if collection.total_pages == FIRST_PAGE
+            return {} if collection.first_page? && collection.last_page?
 
             {}.tap do |pages|
               pages[:self] = collection.current_page
 
-              unless collection.current_page == FIRST_PAGE
+              unless collection.first_page?
                 pages[:first] = FIRST_PAGE
-                pages[:prev]  = collection.current_page - FIRST_PAGE
+                pages[:prev]  = collection.prev_page
               end
 
-              unless collection.current_page == collection.total_pages
-                pages[:next] = collection.current_page + FIRST_PAGE
+              unless collection.last_page?
+                pages[:next] = collection.next_page
                 pages[:last] = collection.total_pages
               end
             end

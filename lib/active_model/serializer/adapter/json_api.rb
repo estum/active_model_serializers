@@ -9,6 +9,9 @@ module ActiveModel
           super
           @hash = { data: [] }
 
+          @_include_opt = @options[:include]
+          @_include_opt = @_include_opt.split(',') if @_include_opt.is_a?(String)
+
           if fields = options.delete(:fields)
             @fieldset = ActiveModel::Serializer::Fieldset.new(fields, serializer.json_key)
           else
@@ -116,19 +119,17 @@ module ActiveModel
         end
 
         def include_assoc?(assoc)
-          return false unless @options[:include]
+          return false unless @_include_opt.present?
           check_assoc("#{assoc}$")
         end
 
         def include_nested_assoc?(assoc)
-          return false unless @options[:include]
+          return false unless @_include_otp.present?
           check_assoc("#{assoc}.")
         end
 
         def check_assoc(assoc)
-          include_opt = @options[:include]
-          include_opt = include_opt.split(',') if include_opt.is_a?(String)
-          include_opt.any? do |s|
+          @_include_opt.any? do |s|
             s.match(/^#{assoc.gsub('.', '\.')}/)
           end
         end

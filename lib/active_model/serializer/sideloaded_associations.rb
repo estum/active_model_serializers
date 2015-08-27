@@ -34,7 +34,7 @@ module ActiveModel
       # @api protected
       #
       def association_preloaded?(reflection)
-        object.association_cache.key?(reflection.name)
+        object.association_cache.include?(reflection.name.to_sym)
       end
     end
   end

@@ -15,8 +15,14 @@ module ActiveModel
           associations = associations.is_a?(String) ? associations.split(",") : associations.dup
 
           associations.map! do |association|
-            association.include?('.') ? build_nested_hash(association) : association
+            if association.include?('.')
+              build_nested_hash(association)
+            else
+              association.to_sym
+            end
           end
+
+          associations = merge_nested_hashes(associations)
 
           if resource.respond_to?(:includes)
             resource = resource.includes(*associations)
@@ -43,8 +49,24 @@ module ActiveModel
       #   # => { "posts" => { "comments" => "author" } }
       def build_nested_hash(association)
         association.split('.').reverse_each.reduce do |nested_child, parent|
-          { parent => nested_child }
+          nested_child = nested_child.to_sym if nested_child.is_a?(String)
+          { parent.to_sym => nested_child }
         end
+      end
+
+      def merge_nested_hashes(associations)
+        result = []
+        merged = associations.reduce({}) do |sum, item|
+          if item.is_a?(Hash)
+            sum.merge!(item) { |k, v1, v2| merge_nested_hashes([v1, v2].flatten.uniq) }
+          else
+            result << item
+            sum
+          end
+        end
+        result -= merged.keys
+        result << merged
+        result
       end
     end
   end

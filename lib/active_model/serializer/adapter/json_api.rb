@@ -29,6 +29,10 @@ module ActiveModel
               end
             end
 
+            if @hash[:included]
+              @hash[:included].uniq! { |h| h.values_at(:id, :type) }
+            end
+
             add_links(options)
           else
             @hash[:data] = attributes_for_serializer(serializer, options)

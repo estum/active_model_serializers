@@ -9,6 +9,10 @@ module ActiveModel
           super
           @hash = { data: [] }
 
+          if links = options.delete(:links)
+            @hash[:links] = links
+          end
+
           if fields = options.delete(:fields)
             @fieldset = ActiveModel::Serializer::Fieldset.new(fields, serializer.json_key)
           else

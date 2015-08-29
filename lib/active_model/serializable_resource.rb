@@ -5,7 +5,7 @@ module ActiveModel
 
     autoload :Sideloader
 
-    ADAPTER_OPTION_KEYS = Set.new([:include, :fields, :adapter])
+    ADAPTER_OPTION_KEYS = Set.new([:include, :fields, :adapter, :links])
 
     def initialize(resource, options = {})
       @resource = resource
